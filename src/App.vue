@@ -8,7 +8,7 @@
       <div class="content-wrapper">
         <header class="header">
           <h1 class="title">Heartbeat Link</h1>
-          <p class="subtitle">❤️ 程序员远程开发</p>
+          <p class="subtitle">❤️❤️❤️❤️❤️</p>
         </header>
 
         <main class="main-content">
@@ -56,8 +56,8 @@
         </main>
 
         <footer class="footer" v-if="dueDate">
-          <p class="footer-message">—— 爱你的程序员</p>
-          <p class="footer-sub">远程开发 · 母亲节献礼</p>
+          <p class="footer-message">—— 爱你的郭助</p>
+          <p class="footer-sub">郭助开发 · 母亲节献礼</p>
         </footer>
       </div>
 
