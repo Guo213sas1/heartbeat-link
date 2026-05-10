@@ -83,7 +83,7 @@ const canvasRef = ref<InstanceType<typeof AmnioticCanvas> | null>(null);
 
 const today = new Date();
 const minDate = new Date(today.getTime() - 280 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
-const maxDate = new Date(today.getTime() + 60 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+const maxDate = new Date(today.getTime() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
 
 const status = computed(() => {
   if (!dueDate.value) {
