@@ -8,25 +8,34 @@
         playsinline
         webkit-playsinline
         x5-playsinline
+        preload="auto"
         @loadedmetadata="handleVideoLoaded"
+        @canplay="handleCanPlay"
         @ended="handleVideoEnded"
         @play="handlePlay"
         @pause="handlePause"
         @error="handleVideoError"
+        @waiting="handleWaiting"
       >
         <source :src="videoPath" type="video/mp4" />
+        您的浏览器不支持视频播放
       </video>
       
       <div class="video-overlay">
         <div class="video-content">
-          <div class="play-icon" v-if="showPlayButton" @click="playVideo">
+          <div class="play-icon" v-if="showPlayButton && !isLoading" @click="playVideo">
             <span class="play-arrow">▶</span>
           </div>
-          <div class="video-text" v-if="!isPlaying && !isLoading">
+          <div class="video-text" v-if="!isPlaying && !isLoading && showPlayButton">
             <p>点击播放礼物视频</p>
           </div>
           <div class="loading-text" v-if="isLoading">
+            <div class="spinner"></div>
             <p>🎬 正在加载...</p>
+          </div>
+          <div class="error-text" v-if="hasError">
+            <p>😢 视频加载失败</p>
+            <p class="error-hint">请检查网络连接</p>
           </div>
         </div>
         
@@ -36,7 +45,7 @@
           <span class="total-time">{{ formatTime(duration) }}</span>
         </div>
         
-        <div class="progress-bar-container">
+        <div class="progress-bar-container" v-if="duration > 0">
           <div class="progress-bar" :style="{ width: progressPercent + '%' }"></div>
         </div>
       </div>
@@ -56,19 +65,20 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed, watch } from 'vue';
-
-const videoPath = new URL('/video/4f50fefb8938579d3dd8e55db283ee95.mp4', import.meta.url).href;
+import { ref, onMounted, computed } from 'vue';
 
 const emit = defineEmits<{
   (e: 'enter'): void;
 }>();
+
+const videoPath = 'video/4f50fefb8938579d3dd8e55db283ee95.mp4';
 
 const videoRef = ref<HTMLVideoElement | null>(null);
 const isExiting = ref(false);
 const isPlaying = ref(false);
 const isLoading = ref(true);
 const showPlayButton = ref(true);
+const hasError = ref(false);
 const currentTime = ref(0);
 const duration = ref(0);
 
@@ -81,13 +91,13 @@ function getHeartStyle(index: number) {
   const size = Math.random() * 20 + 10;
   const left = Math.random() * 100;
   const delay = Math.random() * 3;
-  const duration = Math.random() * 4 + 3;
+  const dur = Math.random() * 4 + 3;
 
   return {
     left: `${left}%`,
     fontSize: `${size}px`,
     animationDelay: `${delay}s`,
-    animationDuration: `${duration}s`,
+    animationDuration: `${dur}s`,
     opacity: Math.random() * 0.5 + 0.3
   };
 }
@@ -101,12 +111,20 @@ function formatTime(seconds: number): string {
 function handleVideoLoaded() {
   if (videoRef.value) {
     duration.value = videoRef.value.duration;
-    isLoading.value = false;
   }
+}
+
+function handleCanPlay() {
+  isLoading.value = false;
+}
+
+function handleWaiting() {
+  isLoading.value = true;
 }
 
 function handlePlay() {
   isPlaying.value = true;
+  isLoading.value = false;
 }
 
 function handlePause() {
@@ -116,12 +134,14 @@ function handlePause() {
 function handleVideoError(e: Event) {
   console.error('Video error:', e);
   isLoading.value = false;
+  hasError.value = true;
 }
 
 async function playVideo() {
   if (!videoRef.value) return;
   
   showPlayButton.value = false;
+  hasError.value = false;
   
   try {
     await videoRef.value.play();
@@ -129,6 +149,7 @@ async function playVideo() {
   } catch (error) {
     console.error('Play failed:', error);
     showPlayButton.value = true;
+    hasError.value = true;
   }
 }
 
@@ -201,7 +222,6 @@ onMounted(() => {
   justify-content: center;
   align-items: center;
   background: rgba(0, 0, 0, 0);
-  transition: background 0.3s ease;
 }
 
 .video-content {
@@ -241,11 +261,32 @@ onMounted(() => {
   margin-left: 6px;
 }
 
-.video-text, .loading-text {
+.video-text, .loading-text, .error-text {
   margin-top: 20px;
   color: #5D4037;
   font-size: 16px;
   font-weight: 500;
+  text-align: center;
+}
+
+.error-hint {
+  font-size: 12px;
+  color: #8B7355;
+  margin-top: 8px;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid rgba(255, 107, 107, 0.3);
+  border-top-color: #FF6B6B;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 12px;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
 
 .progress-info {
@@ -321,7 +362,7 @@ onMounted(() => {
     margin-left: 8px;
   }
 
-  .video-text, .loading-text {
+  .video-text, .loading-text, .error-text {
     font-size: 18px;
   }
 
