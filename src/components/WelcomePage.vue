@@ -15,9 +15,9 @@
       </div>
 
       <div class="text-content" :class="{ 'is-hidden': isOpening }">
-        <h1 class="main-title">母亲节快乐，亲爱的妈妈</h1>
+        <h1 class="main-title">母亲节快乐，偶滴宝</h1>
         <p class="subtitle">这是今年最特别的礼物，也是你这一年最辛苦的成果。</p>
-        <p class="sub-subtitle">—— 爱你的程序员</p>
+        <p class="sub-subtitle">—— 爱你的郭助</p>
       </div>
 
       <button
@@ -28,10 +28,6 @@
         <span class="button-text">拆开给妈妈的礼物</span>
         <span class="button-icon">🎁</span>
       </button>
-
-      <div class="fallback-link" :class="{ 'is-hidden': isOpening }">
-        <p>如果不是5月母亲节期间，<a href="javascript:void(0)" @click="goToMain">点击这里直接进入</a></p>
-      </div>
     </div>
 
     <div class="fade-overlay" :class="{ 'is-active': showOverlay }"></div>
@@ -62,14 +58,6 @@ function handleOpenGift() {
   setTimeout(() => {
     emit('enter');
   }, 1800);
-}
-
-function goToMain() {
-  isOpening.value = true;
-  showOverlay.value = true;
-  setTimeout(() => {
-    emit('enter');
-  }, 500);
 }
 </script>
 
@@ -280,22 +268,6 @@ function goToMain() {
 
 .button-icon {
   font-size: 20px;
-}
-
-.fallback-link {
-  margin-top: 32px;
-  font-size: 13px;
-  color: #A69076;
-}
-
-.fallback-link a {
-  color: #FF6B6B;
-  text-decoration: underline;
-  cursor: pointer;
-}
-
-.fallback-link.is-hidden {
-  opacity: 0;
 }
 
 .fade-overlay {
