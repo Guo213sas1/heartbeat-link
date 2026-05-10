@@ -14,7 +14,7 @@
         @pause="handlePause"
         @error="handleVideoError"
       >
-        <source src="./video/4f50fefb8938579d3dd8e55db283ee95.mp4" type="video/mp4" />
+        <source :src="videoPath" type="video/mp4" />
       </video>
       
       <div class="video-overlay">
@@ -57,6 +57,8 @@
 
 <script setup lang="ts">
 import { ref, onMounted, computed, watch } from 'vue';
+
+const videoPath = new URL('/video/4f50fefb8938579d3dd8e55db283ee95.mp4', import.meta.url).href;
 
 const emit = defineEmits<{
   (e: 'enter'): void;
