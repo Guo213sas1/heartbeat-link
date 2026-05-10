@@ -108,6 +108,7 @@ function handleEnterMain() {
 
 function handleEnterProgress() {
   showLoveLetter.value = false;
+  showWelcome.value = false;
 }
 
 const today = new Date();
