@@ -14,7 +14,7 @@
         @pause="handlePause"
         @error="handleVideoError"
       >
-        <source src="/video/4f50fefb8938579d3dd8e55db283ee95.mp4" type="video/mp4" />
+        <source src="./video/4f50fefb8938579d3dd8e55db283ee95.mp4" type="video/mp4" />
       </video>
       
       <div class="video-overlay">
