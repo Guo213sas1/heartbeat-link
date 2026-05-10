@@ -4,11 +4,15 @@
       <video
         ref="videoRef"
         class="gift-video"
-        autoplay
         muted
-        loop
+        playsinline
+        webkit-playsinline
+        x5-playsinline
         @loadedmetadata="handleVideoLoaded"
         @ended="handleVideoEnded"
+        @play="handlePlay"
+        @pause="handlePause"
+        @error="handleVideoError"
       >
         <source src="/video/4f50fefb8938579d3dd8e55db283ee95.mp4" type="video/mp4" />
       </video>
@@ -18,12 +22,15 @@
           <div class="play-icon" v-if="showPlayButton" @click="playVideo">
             <span class="play-arrow">▶</span>
           </div>
-          <div class="video-text" v-if="!isPlaying">
+          <div class="video-text" v-if="!isPlaying && !isLoading">
             <p>点击播放礼物视频</p>
+          </div>
+          <div class="loading-text" v-if="isLoading">
+            <p>🎬 正在加载...</p>
           </div>
         </div>
         
-        <div class="progress-info" v-if="isPlaying">
+        <div class="progress-info" v-if="isPlaying && duration > 0">
           <span class="current-time">{{ formatTime(currentTime) }}</span>
           <span class="time-separator">/</span>
           <span class="total-time">{{ formatTime(duration) }}</span>
@@ -49,7 +56,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted, computed, watch } from 'vue';
 
 const emit = defineEmits<{
   (e: 'enter'): void;
@@ -58,6 +65,7 @@ const emit = defineEmits<{
 const videoRef = ref<HTMLVideoElement | null>(null);
 const isExiting = ref(false);
 const isPlaying = ref(false);
+const isLoading = ref(true);
 const showPlayButton = ref(true);
 const currentTime = ref(0);
 const duration = ref(0);
@@ -91,14 +99,34 @@ function formatTime(seconds: number): string {
 function handleVideoLoaded() {
   if (videoRef.value) {
     duration.value = videoRef.value.duration;
+    isLoading.value = false;
   }
 }
 
-function playVideo() {
-  if (videoRef.value) {
-    videoRef.value.play();
+function handlePlay() {
+  isPlaying.value = true;
+}
+
+function handlePause() {
+  isPlaying.value = false;
+}
+
+function handleVideoError(e: Event) {
+  console.error('Video error:', e);
+  isLoading.value = false;
+}
+
+async function playVideo() {
+  if (!videoRef.value) return;
+  
+  showPlayButton.value = false;
+  
+  try {
+    await videoRef.value.play();
     isPlaying.value = true;
-    showPlayButton.value = false;
+  } catch (error) {
+    console.error('Play failed:', error);
+    showPlayButton.value = true;
   }
 }
 
@@ -148,6 +176,7 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 20px;
 }
 
 .gift-video {
@@ -156,6 +185,7 @@ onMounted(() => {
   object-fit: contain;
   border-radius: 16px;
   box-shadow: 0 20px 60px rgba(255, 107, 107, 0.3);
+  background: #000;
 }
 
 .video-overlay {
@@ -209,7 +239,7 @@ onMounted(() => {
   margin-left: 6px;
 }
 
-.video-text {
+.video-text, .loading-text {
   margin-top: 20px;
   color: #5D4037;
   font-size: 16px;
@@ -219,7 +249,7 @@ onMounted(() => {
 .progress-info {
   position: absolute;
   bottom: 60px;
-  right: 20px;
+  right: 30px;
   color: white;
   font-size: 14px;
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
@@ -229,9 +259,9 @@ onMounted(() => {
 
 .progress-bar-container {
   position: absolute;
-  bottom: 20px;
-  left: 20px;
-  right: 20px;
+  bottom: 30px;
+  left: 30px;
+  right: 30px;
   height: 4px;
   background: rgba(255, 255, 255, 0.3);
   border-radius: 2px;
@@ -289,7 +319,7 @@ onMounted(() => {
     margin-left: 8px;
   }
 
-  .video-text {
+  .video-text, .loading-text {
     font-size: 18px;
   }
 
