@@ -1,10 +1,10 @@
 <template>
-  <div class="love-letter" :class="{ 'is-exiting': isExiting }">
-    <div class="letter-bg"></div>
+  <div class="love-animation" :class="{ 'is-exiting': isExiting }">
+    <div class="animation-bg"></div>
 
     <div class="floating-hearts">
       <div
-        v-for="i in 20"
+        v-for="i in 30"
         :key="i"
         class="heart"
         :style="getHeartStyle(i)"
@@ -15,7 +15,7 @@
 
     <div class="floating-petals">
       <div
-        v-for="i in 15"
+        v-for="i in 20"
         :key="'petal-' + i"
         class="petal"
         :style="getPetalStyle(i)"
@@ -24,43 +24,27 @@
       </div>
     </div>
 
-    <div class="letter-content" :class="{ 'is-visible': showContent }">
-      <div class="envelope" :class="{ 'is-open': isEnvelopeOpen }">
-        <div class="envelope-front">
-          <div class="envelope-ribbon"></div>
-        </div>
-        <div class="envelope-back"></div>
-      </div>
-
-      <div class="letter-paper" :class="{ 'is-open': isEnvelopeOpen }">
-        <div class="letter-content-inner">
-          <div class="heart-icon">💕</div>
-          <h2 class="letter-title">给我的宝贝老婆</h2>
-          <div class="letter-body">
-            <p
-              v-for="(line, index) in letterLines"
-              :key="index"
-              class="letter-line"
-              :class="{ 'is-visible': visibleLines >= index }"
-              :style="{ transitionDelay: `${index * 0.3}s` }"
-            >
-              {{ line }}
-            </p>
-          </div>
-          <div class="letter-signature" :class="{ 'is-visible': showSignature }">
-            <p>永远爱你的人</p>
-            <p class="signature-name">—— 爱你的郭助</p>
-          </div>
-        </div>
-      </div>
-
-      <button
-        v-if="showEnterButton"
-        class="enter-button"
-        @click="handleEnter"
+    <div class="floating-stars">
+      <div
+        v-for="i in 15"
+        :key="'star-' + i"
+        class="star"
+        :style="getStarStyle(i)"
       >
-        <span>接收这份爱意 💝</span>
-      </button>
+        ✨
+      </div>
+    </div>
+
+    <div class="center-content">
+      <div class="sparkle-ring">
+        <div class="ring-inner"></div>
+        <div class="ring-outer"></div>
+      </div>
+      <div class="gift-emoji">🎁</div>
+      <div class="animation-text">宝贝，你的礼物来啦</div>
+      <div class="progress-bar">
+        <div class="progress-fill"></div>
+      </div>
     </div>
   </div>
 </template>
@@ -72,28 +56,30 @@ const emit = defineEmits<{
   (e: 'enter'): void;
 }>();
 
-const isEnvelopeOpen = ref(false);
-const showContent = ref(false);
-const visibleLines = ref(-1);
-const showSignature = ref(false);
-const showEnterButton = ref(false);
 const isExiting = ref(false);
 
-const letterLines = [
-  '谢谢你选择了我',
-  '谢谢你愿意为我承受这一切',
-  '280个日夜，你辛苦了',
-  '每一次孕吐、每一声叹息、每一个难眠的夜晚',
-  '都在告诉我，你有多勇敢',
-  '现在，让我们一起期待',
-  '那个最珍贵的见面'
-];
-
 function getHeartStyle(index: number) {
-  const size = Math.random() * 20 + 10;
+  const size = Math.random() * 25 + 12;
   const left = Math.random() * 100;
-  const delay = Math.random() * 5;
-  const duration = Math.random() * 3 + 4;
+  const delay = Math.random() * 4;
+  const duration = Math.random() * 4 + 3;
+  const rotation = Math.random() * 360;
+
+  return {
+    left: `${left}%`,
+    fontSize: `${size}px`,
+    animationDelay: `${delay}s`,
+    animationDuration: `${duration}s`,
+    opacity: Math.random() * 0.6 + 0.4,
+    transform: `rotate(${rotation}deg)`
+  };
+}
+
+function getPetalStyle(index: number) {
+  const size = Math.random() * 18 + 12;
+  const left = Math.random() * 100;
+  const delay = Math.random() * 6;
+  const duration = Math.random() * 6 + 4;
 
   return {
     left: `${left}%`,
@@ -104,65 +90,41 @@ function getHeartStyle(index: number) {
   };
 }
 
-function getPetalStyle(index: number) {
-  const size = Math.random() * 15 + 10;
+function getStarStyle(index: number) {
+  const size = Math.random() * 16 + 8;
   const left = Math.random() * 100;
-  const delay = Math.random() * 8;
-  const duration = Math.random() * 5 + 5;
+  const top = Math.random() * 100;
+  const delay = Math.random() * 3;
+  const duration = Math.random() * 2 + 1.5;
 
   return {
     left: `${left}%`,
+    top: `${top}%`,
     fontSize: `${size}px`,
     animationDelay: `${delay}s`,
     animationDuration: `${duration}s`,
-    opacity: Math.random() * 0.4 + 0.2
+    opacity: Math.random() * 0.7 + 0.3
   };
-}
-
-function handleEnter() {
-  isExiting.value = true;
-  setTimeout(() => {
-    emit('enter');
-  }, 1000);
 }
 
 onMounted(() => {
   setTimeout(() => {
-    showContent.value = true;
-  }, 300);
-
-  setTimeout(() => {
-    isEnvelopeOpen.value = true;
-  }, 1200);
-
-  setTimeout(() => {
-    visibleLines.value = 0;
-  }, 2000);
-
-  letterLines.forEach((_, index) => {
+    isExiting.value = true;
     setTimeout(() => {
-      visibleLines.value = index;
-    }, 2500 + index * 400);
-  });
-
-  setTimeout(() => {
-    showSignature.value = true;
-  }, 2500 + letterLines.length * 400 + 500);
-
-  setTimeout(() => {
-    showEnterButton.value = true;
-  }, 2500 + letterLines.length * 400 + 1500);
+      emit('enter');
+    }, 800);
+  }, 3000);
 });
 </script>
 
 <style scoped>
-.love-letter {
+.love-animation {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #1a1a2e 100%);
+  background: linear-gradient(135deg, #FFF0F5 0%, #FFE4E1 30%, #FFF8E7 60%, #FFEFD5 100%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -171,25 +133,26 @@ onMounted(() => {
   transition: opacity 0.8s ease, transform 0.8s ease;
 }
 
-.love-letter.is-exiting {
+.love-animation.is-exiting {
   opacity: 0;
-  transform: scale(1.1);
+  transform: scale(1.05);
 }
 
-.letter-bg {
+.animation-bg {
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
   background:
-    radial-gradient(circle at 20% 80%, rgba(255, 107, 107, 0.1) 0%, transparent 50%),
-    radial-gradient(circle at 80% 20%, rgba(255, 159, 67, 0.1) 0%, transparent 50%),
-    radial-gradient(circle at 50% 50%, rgba(255, 107, 107, 0.05) 0%, transparent 70%);
+    radial-gradient(circle at 30% 20%, rgba(255, 182, 193, 0.3) 0%, transparent 40%),
+    radial-gradient(circle at 70% 80%, rgba(255, 218, 185, 0.3) 0%, transparent 40%),
+    radial-gradient(circle at 50% 50%, rgba(255, 182, 193, 0.2) 0%, transparent 60%);
 }
 
 .floating-hearts,
-.floating-petals {
+.floating-petals,
+.floating-stars {
   position: absolute;
   top: 0;
   left: 0;
@@ -201,12 +164,11 @@ onMounted(() => {
 
 .heart {
   position: absolute;
-  bottom: -50px;
-  animation: floatUp linear infinite;
-  color: #ff6b6b;
+  bottom: -60px;
+  animation: floatUpHeart ease-in-out infinite;
 }
 
-@keyframes floatUp {
+@keyframes floatUpHeart {
   0% {
     transform: translateY(0) rotate(0deg) scale(1);
     opacity: 0;
@@ -214,20 +176,22 @@ onMounted(() => {
   10% {
     opacity: 1;
   }
+  50% {
+    transform: translateY(-50vh) rotate(180deg) scale(1.2);
+  }
   90% {
     opacity: 1;
   }
   100% {
-    transform: translateY(-110vh) rotate(360deg) scale(0.5);
+    transform: translateY(-110vh) rotate(360deg) scale(0.6);
     opacity: 0;
   }
 }
 
 .petal {
   position: absolute;
-  bottom: -50px;
-  animation: floatUpPetal linear infinite;
-  color: #ffb7c5;
+  bottom: -60px;
+  animation: floatUpPetal ease-in-out infinite;
 }
 
 @keyframes floatUpPetal {
@@ -238,221 +202,187 @@ onMounted(() => {
   10% {
     opacity: 1;
   }
-  50% {
-    transform: translateY(-50vh) translateX(30px) rotate(180deg);
+  30% {
+    transform: translateY(-30vh) translateX(40px) rotate(90deg);
+  }
+  60% {
+    transform: translateY(-60vh) translateX(-20px) rotate(180deg);
   }
   90% {
     opacity: 1;
   }
   100% {
-    transform: translateY(-110vh) translateX(-30px) rotate(360deg);
+    transform: translateY(-110vh) translateX(30px) rotate(360deg);
     opacity: 0;
   }
 }
 
-.letter-content {
+.star {
+  position: absolute;
+  animation: twinkle ease-in-out infinite;
+}
+
+@keyframes twinkle {
+  0%, 100% {
+    opacity: 0.3;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.3);
+  }
+}
+
+.center-content {
   position: relative;
   z-index: 1;
-  text-align: center;
-  padding: 24px;
-  max-width: 500px;
-  opacity: 0;
-  transform: translateY(30px);
-  transition: opacity 0.8s ease, transform 0.8s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
 }
 
-.letter-content.is-visible {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-.envelope {
+.sparkle-ring {
   position: relative;
   width: 180px;
-  height: 120px;
-  margin: 0 auto 30px;
-  perspective: 1000px;
+  height: 180px;
+  animation: ringPulse 2s ease-in-out infinite;
 }
 
-.envelope-front {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  height: 80px;
-  background: linear-gradient(145deg, #ffd93d 0%, #f4a300 100%);
-  border-radius: 8px;
-  z-index: 2;
-  transition: transform 0.6s ease;
-  transform-origin: bottom center;
+@keyframes ringPulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 0.8;
+  }
 }
 
-.envelope.is-open .envelope-front {
-  transform: rotateX(-180deg);
-}
-
-.envelope-ribbon {
-  position: absolute;
-  left: 50%;
-  top: 0;
-  width: 20px;
-  height: 100%;
-  background: linear-gradient(180deg, #ff6b6b 0%, #ff9f43 100%);
-  transform: translateX(-50%);
-}
-
-.envelope-back {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  height: 80px;
-  background: linear-gradient(145deg, #f4a300 0%, #e69500 100%);
-  border-radius: 8px;
-  z-index: 1;
-}
-
-.letter-paper {
+.ring-inner {
   position: absolute;
   top: 50%;
   left: 50%;
-  width: calc(100% - 40px);
-  max-width: 400px;
-  background: linear-gradient(180deg, #fff9e6 0%, #fff5d6 100%);
-  border-radius: 8px;
-  padding: 30px 20px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
-  transform: translate(-50%, -50%) scale(0.8);
-  opacity: 0;
-  transition: transform 0.8s ease 0.5s, opacity 0.8s ease 0.5s;
-  z-index: 3;
+  width: 120px;
+  height: 120px;
+  border: 3px solid rgba(255, 107, 107, 0.4);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  animation: ringRotate 3s linear infinite;
 }
 
-.letter-paper.is-open {
-  transform: translate(-50%, -50%) scale(1);
-  opacity: 1;
+.ring-outer {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 160px;
+  height: 160px;
+  border: 2px solid rgba(255, 159, 67, 0.3);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  animation: ringRotate 4s linear infinite reverse;
 }
 
-.letter-content-inner {
-  color: #5d4037;
+@keyframes ringRotate {
+  from {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+  to {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
 }
 
-.heart-icon {
-  font-size: 40px;
-  margin-bottom: 16px;
-  animation: heartbeat 1.5s ease infinite;
+.gift-emoji {
+  font-size: 80px;
+  animation: giftBounce 1.5s ease-in-out infinite;
+  filter: drop-shadow(0 8px 20px rgba(255, 107, 107, 0.3));
 }
 
-@keyframes heartbeat {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.1); }
-}
-
-.letter-title {
-  font-size: 24px;
-  font-weight: 700;
-  color: #ff6b6b;
-  margin-bottom: 20px;
-}
-
-.letter-body {
-  text-align: left;
-  margin-bottom: 24px;
-}
-
-.letter-line {
-  font-size: 16px;
-  line-height: 1.8;
-  color: #5d4037;
-  margin-bottom: 8px;
-  opacity: 0;
-  transform: translateY(10px);
-  transition: opacity 0.5s ease, transform 0.5s ease;
-}
-
-.letter-line.is-visible {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-.letter-signature {
-  text-align: right;
-  opacity: 0;
-  transform: translateY(10px);
-  transition: opacity 0.5s ease, transform 0.5s ease;
-}
-
-.letter-signature.is-visible {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-.letter-signature p {
-  font-size: 14px;
-  color: #8b7355;
-  margin: 0;
-}
-
-.signature-name {
-  font-size: 16px !important;
-  font-weight: 600;
-  color: #ff6b6b !important;
-  margin-top: 8px !important;
-}
-
-.enter-button {
-  margin-top: 30px;
-  padding: 18px 40px;
-  background: linear-gradient(135deg, #ff6b6b 0%, #ff9f43 100%);
-  border: none;
-  border-radius: 50px;
-  color: white;
-  font-size: 18px;
-  font-weight: 600;
-  cursor: pointer;
-  box-shadow: 0 8px 30px rgba(255, 107, 107, 0.4);
-  transition: all 0.3s ease;
-  animation: pulse 2s ease infinite;
-}
-
-.enter-button:hover {
-  transform: translateY(-3px) scale(1.05);
-  box-shadow: 0 12px 40px rgba(255, 107, 107, 0.5);
-}
-
-.enter-button:active {
-  transform: translateY(0) scale(0.98);
-}
-
-@keyframes pulse {
+@keyframes giftBounce {
   0%, 100% {
-    box-shadow: 0 8px 30px rgba(255, 107, 107, 0.4);
+    transform: translateY(0) scale(1);
+  }
+  25% {
+    transform: translateY(-10px) scale(1.05);
   }
   50% {
-    box-shadow: 0 8px 50px rgba(255, 107, 107, 0.6);
+    transform: translateY(0) scale(1);
+  }
+  75% {
+    transform: translateY(-5px) scale(1.02);
+  }
+}
+
+.animation-text {
+  font-size: 24px;
+  font-weight: 600;
+  color: #5D4037;
+  text-shadow: 0 2px 10px rgba(255, 107, 107, 0.2);
+  animation: textFade 3s ease-in-out infinite;
+}
+
+@keyframes textFade {
+  0%, 100% {
+    opacity: 0.7;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.progress-bar {
+  width: 200px;
+  height: 8px;
+  background: rgba(255, 182, 193, 0.3);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, #FF6B6B, #FF9F43);
+  border-radius: 4px;
+  animation: progressMove 3s ease-in-out infinite;
+}
+
+@keyframes progressMove {
+  0% {
+    width: 0%;
+  }
+  100% {
+    width: 100%;
   }
 }
 
 @media (min-width: 768px) {
-  .letter-title {
+  .gift-emoji {
+    font-size: 100px;
+  }
+
+  .animation-text {
     font-size: 28px;
   }
 
-  .letter-line {
-    font-size: 18px;
+  .progress-bar {
+    width: 280px;
+    height: 10px;
   }
 
-  .envelope {
+  .sparkle-ring {
     width: 220px;
+    height: 220px;
+  }
+
+  .ring-inner {
+    width: 150px;
     height: 150px;
   }
 
-  .envelope-front {
-    height: 100px;
-  }
-
-  .envelope-back {
-    height: 100px;
+  .ring-outer {
+    width: 200px;
+    height: 200px;
   }
 }
 </style>
