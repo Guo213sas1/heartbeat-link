@@ -180,7 +180,7 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 9998;
+  z-index: 10000;
   overflow: hidden;
   transition: opacity 0.8s ease, transform 0.8s ease;
 }
