@@ -1,70 +1,74 @@
 <template>
   <div class="app" @click="handleAppClick">
-    <AmnioticCanvas ref="canvasRef" :isKicking="isKicking" @kick-triggered="handleKickTriggered" />
+    <WelcomePage v-if="showWelcome" @enter="handleEnterMain" />
+    <template v-else>
+      <AmnioticCanvas ref="canvasRef" :isKicking="isKicking" @kick-triggered="handleKickTriggered" />
 
-    <div class="content-wrapper">
-      <header class="header">
-        <h1 class="title">Heartbeat Link</h1>
-        <p class="subtitle">❤️ 程序员远程开发</p>
-      </header>
+      <div class="content-wrapper">
+        <header class="header">
+          <h1 class="title">Heartbeat Link</h1>
+          <p class="subtitle">❤️ 程序员远程开发</p>
+        </header>
 
-      <main class="main-content">
-        <div v-if="!dueDate" class="setup-card">
-          <div class="setup-icon">👶</div>
-          <h2 class="setup-title">欢迎使用 Heartbeat Link</h2>
-          <p class="setup-description">请设置预产期开始追踪孕期进度</p>
-          <div class="setup-form">
-            <input
-              type="date"
-              v-model="inputDate"
-              class="date-input"
-              :min="minDate"
-              :max="maxDate"
+        <main class="main-content">
+          <div v-if="!dueDate" class="setup-card">
+            <div class="setup-icon">👶</div>
+            <h2 class="setup-title">欢迎使用 Heartbeat Link</h2>
+            <p class="setup-description">请设置预产期开始追踪孕期进度</p>
+            <div class="setup-form">
+              <input
+                type="date"
+                v-model="inputDate"
+                class="date-input"
+                :min="minDate"
+                :max="maxDate"
+              />
+              <button @click="setDueDate" class="start-button">开始追踪</button>
+            </div>
+            <p class="setup-hint">或者在 URL 中添加 ?due=YYYY-MM-DD</p>
+          </div>
+
+          <template v-else>
+            <PregnancyCountdown
+              :daysLeft="status.daysLeft"
+              :hoursLeft="status.hoursLeft"
+              :currentWeek="status.currentWeek"
+              :daysIntoWeek="status.daysIntoWeek"
+              :isOverdue="status.isOverdue"
+              :isReady="status.isReady"
             />
-            <button @click="setDueDate" class="start-button">开始追踪</button>
-          </div>
-          <p class="setup-hint">或者在 URL 中添加 ?due=YYYY-MM-DD</p>
-        </div>
 
-        <template v-else>
-          <PregnancyCountdown
-            :daysLeft="status.daysLeft"
-            :hoursLeft="status.hoursLeft"
-            :currentWeek="status.currentWeek"
-            :daysIntoWeek="status.daysIntoWeek"
-            :isOverdue="status.isOverdue"
-            :isReady="status.isReady"
-          />
+            <FruitComparison
+              :fruit="status.currentData.fruit"
+              :fruitEmoji="status.currentData.fruitEmoji"
+              :length="status.currentData.length"
+              :weight="status.currentData.weight"
+            />
 
-          <FruitComparison
-            :fruit="status.currentData.fruit"
-            :fruitEmoji="status.currentData.fruitEmoji"
-            :length="status.currentData.length"
-            :weight="status.currentData.weight"
-          />
+            <DailyTip :tip="status.currentData.tip" :isNew="isTipNew" />
 
-          <DailyTip :tip="status.currentData.tip" :isNew="isTipNew" />
+            <div class="interaction-hint" v-if="showHint">
+              <span class="hint-icon">👆</span>
+              <span class="hint-text">点击屏幕任何地方感受胎动</span>
+            </div>
+          </template>
+        </main>
 
-          <div class="interaction-hint" v-if="showHint">
-            <span class="hint-icon">👆</span>
-            <span class="hint-text">点击屏幕任何地方感受胎动</span>
-          </div>
-        </template>
-      </main>
+        <footer class="footer" v-if="dueDate">
+          <p class="footer-message">—— 爱你的程序员</p>
+          <p class="footer-sub">远程开发 · 母亲节献礼</p>
+        </footer>
+      </div>
 
-      <footer class="footer" v-if="dueDate">
-        <p class="footer-message">—— 爱你的程序员</p>
-        <p class="footer-sub">远程开发 · 母亲节献礼</p>
-      </footer>
-    </div>
-
-    <HeartbeatSimulator v-if="dueDate" />
-    <KickFeedback :trigger="kickTriggered" />
+      <HeartbeatSimulator v-if="dueDate" />
+      <KickFeedback :trigger="kickTriggered" />
+    </template>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue';
+import WelcomePage from './components/WelcomePage.vue';
 import AmnioticCanvas from './components/AmnioticCanvas.vue';
 import PregnancyCountdown from './components/PregnancyCountdown.vue';
 import FruitComparison from './components/FruitComparison.vue';
@@ -73,6 +77,8 @@ import HeartbeatSimulator from './components/HeartbeatSimulator.vue';
 import KickFeedback from './components/KickFeedback.vue';
 import { getBabyStatus } from './data/fruit_data';
 
+const FIXED_DUE_DATE = '2026-09-14';
+const showWelcome = ref(false);
 const dueDate = ref<string | null>(null);
 const inputDate = ref('');
 const isKicking = ref(false);
@@ -80,6 +86,22 @@ const kickTriggered = ref(false);
 const showHint = ref(true);
 const isTipNew = ref(true);
 const canvasRef = ref<InstanceType<typeof AmnioticCanvas> | null>(null);
+
+function isMotherDayPeriod(): boolean {
+  const today = new Date();
+  const month = today.getMonth() + 1;
+  const date = today.getDate();
+
+  if (month === 5 && date >= 1 && date <= 31) {
+    return true;
+  }
+
+  return false;
+}
+
+function handleEnterMain() {
+  showWelcome.value = false;
+}
 
 const today = new Date();
 const minDate = new Date(today.getTime() - 280 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
@@ -133,7 +155,7 @@ function setDueDate() {
 }
 
 function handleAppClick(e: MouseEvent) {
-  if (!dueDate.value) return;
+  if (!dueDate.value || showWelcome.value) return;
 
   const target = e.target as HTMLElement;
   if (target.closest('.heartbeat-simulator') || target.closest('button') || target.closest('input')) {
@@ -168,11 +190,15 @@ function handleKickTriggered() {
 }
 
 onMounted(() => {
+  showWelcome.value = isMotherDayPeriod();
+
   const savedDate = localStorage.getItem('heartbeat-link-due-date');
   if (savedDate) {
     dueDate.value = savedDate;
   } else {
-    setDueDateFromUrl();
+    if (!setDueDateFromUrl()) {
+      dueDate.value = FIXED_DUE_DATE;
+    }
   }
 
   if (dueDate.value) {

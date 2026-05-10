@@ -18,9 +18,11 @@ jobs:
           node-version: '20'
 
       - name: Install Dependencies
+        working-directory: heartbeat-link
         run: npm install
 
       - name: Build Project
+        working-directory: heartbeat-link
         run: npm run build
         env:
           VITE_DUE_DATE: ${{ vars.DEFAULT_DUE_DATE || '2026-08-15' }}
@@ -29,4 +31,4 @@ jobs:
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./dist
+          publish_dir: ./heartbeat-link/dist
