@@ -1,6 +1,7 @@
 <template>
   <div class="app" @click="handleAppClick">
     <WelcomePage v-if="showWelcome" @enter="handleEnterMain" />
+    <LoveLetter v-else-if="showLoveLetter" @enter="handleEnterProgress" />
     <template v-else>
       <AmnioticCanvas ref="canvasRef" :isKicking="isKicking" @kick-triggered="handleKickTriggered" />
 
@@ -69,6 +70,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue';
 import WelcomePage from './components/WelcomePage.vue';
+import LoveLetter from './components/LoveLetter.vue';
 import AmnioticCanvas from './components/AmnioticCanvas.vue';
 import PregnancyCountdown from './components/PregnancyCountdown.vue';
 import FruitComparison from './components/FruitComparison.vue';
@@ -79,6 +81,7 @@ import { getBabyStatus } from './data/fruit_data';
 
 const FIXED_DUE_DATE = '2026-09-14';
 const showWelcome = ref(false);
+const showLoveLetter = ref(false);
 const dueDate = ref<string | null>(null);
 const inputDate = ref('');
 const isKicking = ref(false);
@@ -100,7 +103,11 @@ function isMotherDayPeriod(): boolean {
 }
 
 function handleEnterMain() {
-  showWelcome.value = false;
+  showLoveLetter.value = true;
+}
+
+function handleEnterProgress() {
+  showLoveLetter.value = false;
 }
 
 const today = new Date();
@@ -155,7 +162,7 @@ function setDueDate() {
 }
 
 function handleAppClick(e: MouseEvent) {
-  if (!dueDate.value || showWelcome.value) return;
+  if (!dueDate.value || showWelcome.value || showLoveLetter.value) return;
 
   const target = e.target as HTMLElement;
   if (target.closest('.heartbeat-simulator') || target.closest('button') || target.closest('input')) {

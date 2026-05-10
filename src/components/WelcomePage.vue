@@ -8,10 +8,6 @@
           <div class="gift-ribbon-v"></div>
           <div class="gift-ribbon-h"></div>
           <div class="gift-bow"></div>
-          
-          <div class="baby-reveal" :class="{ 'is-visible': showBaby }">
-            <span class="baby-emoji">👶</span>
-          </div>
         </div>
         <div class="gift-box-lid" :class="{ 'is-open': isOpen }">
           <div class="lid-ribbon"></div>
@@ -34,38 +30,12 @@
       </button>
     </div>
 
-    <div class="magic-particles">
-      <span
-        v-for="particle in particles"
-        :key="particle.id"
-        class="magic-particle"
-        :style="{
-          left: particle.x + 'px',
-          animationDelay: particle.delay + 's',
-          fontSize: particle.size + 'px'
-        }"
-      >{{ particle.emoji }}</span>
-    </div>
-
-    <div class="celebration-screen" :class="{ 'is-visible': showCelebration }">
-      <div class="celebration-content">
-        <div class="celebration-baby">👶</div>
-        <div class="celebration-hearts">
-          <span class="heart">❤️</span>
-          <span class="heart">🧡</span>
-          <span class="heart">💛</span>
-        </div>
-        <p class="celebration-text">送给最棒的妈妈！</p>
-        <p class="celebration-sub">愿你和宝宝健康快乐</p>
-      </div>
-    </div>
-
     <div class="fade-overlay" :class="{ 'is-active': showOverlay }"></div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive } from 'vue';
+import { ref, onMounted } from 'vue';
 import LoveParticles from './LoveParticles.vue';
 
 const emit = defineEmits<{
@@ -75,48 +45,19 @@ const emit = defineEmits<{
 const isOpen = ref(false);
 const isOpening = ref(false);
 const showOverlay = ref(false);
-const showBaby = ref(false);
-const showCelebration = ref(false);
-
-const emojis = ['❤️', '💛', '💚', '💙', '💜', '🌟', '✨', '🎉', '🎊', '🎁', '🎈', '🍼', '🐰', '🦋', '🌸', '🌺', '🌈'];
-
-const particles = reactive<{ id: number; x: number; delay: number; size: number; emoji: string }[]>([]);
-
-function generateParticles() {
-  particles.length = 0;
-  for (let i = 0; i < 20; i++) {
-    particles.push({
-      id: i,
-      x: Math.random() * window.innerWidth,
-      delay: Math.random() * 0.5,
-      size: Math.random() * 20 + 20,
-      emoji: emojis[Math.floor(Math.random() * emojis.length)]
-    });
-  }
-}
 
 function handleOpenGift() {
   if (isOpen.value || isOpening.value) return;
-  
-  generateParticles();
   isOpen.value = true;
 
   setTimeout(() => {
-    showBaby.value = true;
-  }, 500);
-
-  setTimeout(() => {
-    showCelebration.value = true;
     isOpening.value = true;
-  }, 1200);
-
-  setTimeout(() => {
     showOverlay.value = true;
-  }, 2000);
+  }, 800);
 
   setTimeout(() => {
     emit('enter');
-  }, 3500);
+  }, 1800);
 }
 </script>
 
@@ -185,9 +126,6 @@ function handleOpenGift() {
   border-radius: 8px;
   box-shadow: 0 8px 24px rgba(255, 107, 107, 0.3);
   overflow: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 
 .gift-ribbon-v {
@@ -198,7 +136,6 @@ function handleOpenGift() {
   height: 100%;
   background: linear-gradient(180deg, #FFD93D 0%, #F4A300 100%);
   transform: translateX(-50%);
-  z-index: 2;
 }
 
 .gift-ribbon-h {
@@ -209,7 +146,6 @@ function handleOpenGift() {
   height: 16px;
   background: linear-gradient(90deg, #FFD93D 0%, #F4A300 50%, #FFD93D 100%);
   transform: translateY(-50%);
-  z-index: 2;
 }
 
 .gift-bow {
@@ -221,7 +157,6 @@ function handleOpenGift() {
   height: 30px;
   background: radial-gradient(ellipse at center, #FFD93D 0%, #F4A300 100%);
   border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
-  z-index: 3;
 }
 
 .gift-bow::before,
@@ -256,7 +191,6 @@ function handleOpenGift() {
   transform-origin: left bottom;
   transition: transform 0.6s ease;
   box-shadow: 0 4px 12px rgba(255, 107, 107, 0.2);
-  z-index: 4;
 }
 
 .gift-box-lid.is-open {
@@ -271,28 +205,6 @@ function handleOpenGift() {
   height: 100%;
   background: linear-gradient(180deg, #FFD93D 0%, #F4A300 100%);
   transform: translateX(-50%);
-}
-
-.baby-reveal {
-  opacity: 0;
-  transform: scale(0) translateY(20px);
-  transition: all 0.5s ease;
-  z-index: 1;
-}
-
-.baby-reveal.is-visible {
-  opacity: 1;
-  transform: scale(1) translateY(0);
-  animation: babyBounce 0.5s ease infinite alternate;
-}
-
-@keyframes babyBounce {
-  from { transform: scale(1) translateY(0); }
-  to { transform: scale(1.1) translateY(-5px); }
-}
-
-.baby-emoji {
-  font-size: 40px;
 }
 
 .text-content {
@@ -358,133 +270,13 @@ function handleOpenGift() {
   font-size: 20px;
 }
 
-.magic-particles {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  z-index: 5;
-  overflow: hidden;
-}
-
-.magic-particle {
-  position: absolute;
-  bottom: -50px;
-  animation: floatUp 2s ease-out forwards;
-  opacity: 0;
-}
-
-@keyframes floatUp {
-  0% {
-    opacity: 1;
-    transform: translateY(0) rotate(0deg) scale(1);
-  }
-  50% {
-    opacity: 1;
-  }
-  100% {
-    opacity: 0;
-    transform: translateY(-100vh) rotate(360deg) scale(0.5);
-  }
-}
-
-.celebration-screen {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(255, 240, 245, 0.95);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  opacity: 0;
-  pointer-events: none;
-  z-index: 10;
-  transition: opacity 0.5s ease;
-}
-
-.celebration-screen.is-visible {
-  opacity: 1;
-  pointer-events: auto;
-}
-
-.celebration-content {
-  text-align: center;
-  animation: celebrationScale 0.5s ease;
-}
-
-@keyframes celebrationScale {
-  from {
-    transform: scale(0.5);
-    opacity: 0;
-  }
-  to {
-    transform: scale(1);
-    opacity: 1;
-  }
-}
-
-.celebration-baby {
-  font-size: 120px;
-  animation: babyFloat 1s ease-in-out infinite;
-  margin-bottom: 24px;
-}
-
-@keyframes babyFloat {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-20px); }
-}
-
-.celebration-hearts {
-  display: flex;
-  justify-content: center;
-  gap: 16px;
-  margin-bottom: 24px;
-}
-
-.heart {
-  font-size: 32px;
-  animation: heartFloat 0.8s ease-in-out infinite;
-}
-
-.heart:nth-child(1) { animation-delay: 0s; }
-.heart:nth-child(2) { animation-delay: 0.2s; }
-.heart:nth-child(3) { animation-delay: 0.4s; }
-
-@keyframes heartFloat {
-  0%, 100% { transform: translateY(0) scale(1); }
-  50% { transform: translateY(-15px) scale(1.2); }
-}
-
-.celebration-text {
-  font-size: 28px;
-  font-weight: 700;
-  color: #5D4037;
-  margin-bottom: 8px;
-  animation: textFadeIn 0.5s ease 0.3s both;
-}
-
-.celebration-sub {
-  font-size: 18px;
-  color: #8B7355;
-  animation: textFadeIn 0.5s ease 0.5s both;
-}
-
-@keyframes textFadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
 .fade-overlay {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background: linear-gradient(135deg, #FFF0F5 0%, #FDF5F7 100%);
+  background: linear-gradient(135deg, #FFF0F5 0%, #FFE8E0 100%);
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.8s ease;
@@ -515,22 +307,6 @@ function handleOpenGift() {
 
   .gift-box-lid {
     height: 45px;
-  }
-
-  .baby-emoji {
-    font-size: 50px;
-  }
-
-  .celebration-baby {
-    font-size: 150px;
-  }
-
-  .celebration-text {
-    font-size: 36px;
-  }
-
-  .celebration-sub {
-    font-size: 22px;
   }
 }
 </style>
