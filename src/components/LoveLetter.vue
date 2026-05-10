@@ -71,7 +71,7 @@ const emit = defineEmits<{
   (e: 'enter'): void;
 }>();
 
-const videoPath = 'video/4f50fefb8938579d3dd8e55db283ee95.mp4';
+const videoPath = '/heartbeat-link/video/4f50fefb8938579d3dd8e55db283ee95.mp4';
 
 const videoRef = ref<HTMLVideoElement | null>(null);
 const isExiting = ref(false);
