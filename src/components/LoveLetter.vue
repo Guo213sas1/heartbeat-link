@@ -4,7 +4,6 @@
       <video
         ref="videoRef"
         class="gift-video"
-        muted
         playsinline
         webkit-playsinline
         x5-playsinline
