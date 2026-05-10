@@ -1,8 +1,8 @@
 <template>
   <div class="app" @click="handleAppClick">
     <WelcomePage v-if="showWelcome" @enter="handleEnterMain" />
-    <LoveLetter v-else-if="showLoveLetter" @enter="handleEnterProgress" />
-    <template v-else>
+    <LoveLetter v-if="showLoveLetter" @enter="handleEnterProgress" />
+    <template v-if="!showWelcome && !showLoveLetter">
       <AmnioticCanvas ref="canvasRef" :isKicking="isKicking" @kick-triggered="handleKickTriggered" />
 
       <div class="content-wrapper">
