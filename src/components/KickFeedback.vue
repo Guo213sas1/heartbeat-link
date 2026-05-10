@@ -2,8 +2,8 @@
   <Transition name="kick">
     <div v-if="visible" class="kick-feedback">
       <div class="kick-content">
-        <span class="kick-icon">👶</span>
-        <span class="kick-text">宝宝刚才踢了你一下!</span>
+        <span class="kick-icon">👋</span>
+        <span class="kick-text">和宝宝击掌成功!</span>
       </div>
     </div>
   </Transition>
