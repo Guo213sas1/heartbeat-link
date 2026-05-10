@@ -1,10 +1,43 @@
 <template>
-  <div class="love-animation" :class="{ 'is-exiting': isExiting }">
-    <div class="animation-bg"></div>
-
+  <div class="video-transition" :class="{ 'is-exiting': isExiting }">
+    <div class="video-container">
+      <video
+        ref="videoRef"
+        class="gift-video"
+        autoplay
+        muted
+        loop
+        @loadedmetadata="handleVideoLoaded"
+        @ended="handleVideoEnded"
+      >
+        <source src="./video/4f50fefb8938579d3dd8e55db283ee95.mp4" type="video/mp4" />
+      </video>
+      
+      <div class="video-overlay">
+        <div class="video-content">
+          <div class="play-icon" v-if="showPlayButton" @click="playVideo">
+            <span class="play-arrow">▶</span>
+          </div>
+          <div class="video-text" v-if="!isPlaying">
+            <p>点击播放礼物视频</p>
+          </div>
+        </div>
+        
+        <div class="progress-info" v-if="isPlaying">
+          <span class="current-time">{{ formatTime(currentTime) }}</span>
+          <span class="time-separator">/</span>
+          <span class="total-time">{{ formatTime(duration) }}</span>
+        </div>
+        
+        <div class="progress-bar-container">
+          <div class="progress-bar" :style="{ width: progressPercent + '%' }"></div>
+        </div>
+      </div>
+    </div>
+    
     <div class="floating-hearts">
       <div
-        v-for="i in 30"
+        v-for="i in 15"
         :key="i"
         class="heart"
         :style="getHeartStyle(i)"
@@ -12,74 +45,33 @@
         ❤️
       </div>
     </div>
-
-    <div class="floating-petals">
-      <div
-        v-for="i in 20"
-        :key="'petal-' + i"
-        class="petal"
-        :style="getPetalStyle(i)"
-      >
-        🌸
-      </div>
-    </div>
-
-    <div class="floating-stars">
-      <div
-        v-for="i in 15"
-        :key="'star-' + i"
-        class="star"
-        :style="getStarStyle(i)"
-      >
-        ✨
-      </div>
-    </div>
-
-    <div class="center-content">
-      <div class="sparkle-ring">
-        <div class="ring-inner"></div>
-        <div class="ring-outer"></div>
-      </div>
-      <div class="gift-emoji">🎁</div>
-      <div class="animation-text">宝贝，你的礼物来啦</div>
-      <div class="progress-bar">
-        <div class="progress-fill"></div>
-      </div>
-    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 
 const emit = defineEmits<{
   (e: 'enter'): void;
 }>();
 
+const videoRef = ref<HTMLVideoElement | null>(null);
 const isExiting = ref(false);
+const isPlaying = ref(false);
+const showPlayButton = ref(true);
+const currentTime = ref(0);
+const duration = ref(0);
+
+const progressPercent = computed(() => {
+  if (duration.value === 0) return 0;
+  return (currentTime.value / duration.value) * 100;
+});
 
 function getHeartStyle(index: number) {
-  const size = Math.random() * 25 + 12;
+  const size = Math.random() * 20 + 10;
   const left = Math.random() * 100;
-  const delay = Math.random() * 4;
+  const delay = Math.random() * 3;
   const duration = Math.random() * 4 + 3;
-  const rotation = Math.random() * 360;
-
-  return {
-    left: `${left}%`,
-    fontSize: `${size}px`,
-    animationDelay: `${delay}s`,
-    animationDuration: `${duration}s`,
-    opacity: Math.random() * 0.6 + 0.4,
-    transform: `rotate(${rotation}deg)`
-  };
-}
-
-function getPetalStyle(index: number) {
-  const size = Math.random() * 18 + 12;
-  const left = Math.random() * 100;
-  const delay = Math.random() * 6;
-  const duration = Math.random() * 6 + 4;
 
   return {
     left: `${left}%`,
@@ -90,35 +82,44 @@ function getPetalStyle(index: number) {
   };
 }
 
-function getStarStyle(index: number) {
-  const size = Math.random() * 16 + 8;
-  const left = Math.random() * 100;
-  const top = Math.random() * 100;
-  const delay = Math.random() * 3;
-  const duration = Math.random() * 2 + 1.5;
+function formatTime(seconds: number): string {
+  const mins = Math.floor(seconds / 60);
+  const secs = Math.floor(seconds % 60);
+  return `${mins}:${secs.toString().padStart(2, '0')}`;
+}
 
-  return {
-    left: `${left}%`,
-    top: `${top}%`,
-    fontSize: `${size}px`,
-    animationDelay: `${delay}s`,
-    animationDuration: `${duration}s`,
-    opacity: Math.random() * 0.7 + 0.3
-  };
+function handleVideoLoaded() {
+  if (videoRef.value) {
+    duration.value = videoRef.value.duration;
+  }
+}
+
+function playVideo() {
+  if (videoRef.value) {
+    videoRef.value.play();
+    isPlaying.value = true;
+    showPlayButton.value = false;
+  }
+}
+
+function handleVideoEnded() {
+  isExiting.value = true;
+  setTimeout(() => {
+    emit('enter');
+  }, 800);
 }
 
 onMounted(() => {
-  setTimeout(() => {
-    isExiting.value = true;
-    setTimeout(() => {
-      emit('enter');
-    }, 800);
-  }, 3000);
+  setInterval(() => {
+    if (videoRef.value && isPlaying.value) {
+      currentTime.value = videoRef.value.currentTime;
+    }
+  }, 100);
 });
 </script>
 
 <style scoped>
-.love-animation {
+.video-transition {
   position: fixed;
   top: 0;
   left: 0;
@@ -133,26 +134,118 @@ onMounted(() => {
   transition: opacity 0.8s ease, transform 0.8s ease;
 }
 
-.love-animation.is-exiting {
+.video-transition.is-exiting {
   opacity: 0;
   transform: scale(1.05);
 }
 
-.animation-bg {
+.video-container {
+  position: relative;
+  width: 100%;
+  max-width: 640px;
+  height: 100%;
+  max-height: 480px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.gift-video {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(255, 107, 107, 0.3);
+}
+
+.video-overlay {
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background:
-    radial-gradient(circle at 30% 20%, rgba(255, 182, 193, 0.3) 0%, transparent 40%),
-    radial-gradient(circle at 70% 80%, rgba(255, 218, 185, 0.3) 0%, transparent 40%),
-    radial-gradient(circle at 50% 50%, rgba(255, 182, 193, 0.2) 0%, transparent 60%);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background: rgba(0, 0, 0, 0);
+  transition: background 0.3s ease;
 }
 
-.floating-hearts,
-.floating-petals,
-.floating-stars {
+.video-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.play-icon {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: rgba(255, 107, 107, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  animation: pulse 2s ease-in-out infinite;
+  box-shadow: 0 8px 30px rgba(255, 107, 107, 0.5);
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 8px 30px rgba(255, 107, 107, 0.5);
+  }
+  50% {
+    transform: scale(1.1);
+    box-shadow: 0 12px 40px rgba(255, 107, 107, 0.7);
+  }
+}
+
+.play-arrow {
+  color: white;
+  font-size: 28px;
+  margin-left: 6px;
+}
+
+.video-text {
+  margin-top: 20px;
+  color: #5D4037;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.progress-info {
+  position: absolute;
+  bottom: 60px;
+  right: 20px;
+  color: white;
+  font-size: 14px;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+  display: flex;
+  gap: 4px;
+}
+
+.progress-bar-container {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  right: 20px;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #FF6B6B, #FF9F43);
+  border-radius: 2px;
+  transition: width 0.1s linear;
+}
+
+.floating-hearts {
   position: absolute;
   top: 0;
   left: 0;
@@ -164,7 +257,7 @@ onMounted(() => {
 
 .heart {
   position: absolute;
-  bottom: -60px;
+  bottom: -50px;
   animation: floatUpHeart ease-in-out infinite;
 }
 
@@ -176,9 +269,6 @@ onMounted(() => {
   10% {
     opacity: 1;
   }
-  50% {
-    transform: translateY(-50vh) rotate(180deg) scale(1.2);
-  }
   90% {
     opacity: 1;
   }
@@ -188,201 +278,23 @@ onMounted(() => {
   }
 }
 
-.petal {
-  position: absolute;
-  bottom: -60px;
-  animation: floatUpPetal ease-in-out infinite;
-}
-
-@keyframes floatUpPetal {
-  0% {
-    transform: translateY(0) translateX(0) rotate(0deg);
-    opacity: 0;
-  }
-  10% {
-    opacity: 1;
-  }
-  30% {
-    transform: translateY(-30vh) translateX(40px) rotate(90deg);
-  }
-  60% {
-    transform: translateY(-60vh) translateX(-20px) rotate(180deg);
-  }
-  90% {
-    opacity: 1;
-  }
-  100% {
-    transform: translateY(-110vh) translateX(30px) rotate(360deg);
-    opacity: 0;
-  }
-}
-
-.star {
-  position: absolute;
-  animation: twinkle ease-in-out infinite;
-}
-
-@keyframes twinkle {
-  0%, 100% {
-    opacity: 0.3;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 1;
-    transform: scale(1.3);
-  }
-}
-
-.center-content {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 24px;
-}
-
-.sparkle-ring {
-  position: relative;
-  width: 180px;
-  height: 180px;
-  animation: ringPulse 2s ease-in-out infinite;
-}
-
-@keyframes ringPulse {
-  0%, 100% {
-    transform: scale(1);
-    opacity: 1;
-  }
-  50% {
-    transform: scale(1.1);
-    opacity: 0.8;
-  }
-}
-
-.ring-inner {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 120px;
-  height: 120px;
-  border: 3px solid rgba(255, 107, 107, 0.4);
-  border-radius: 50%;
-  transform: translate(-50%, -50%);
-  animation: ringRotate 3s linear infinite;
-}
-
-.ring-outer {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 160px;
-  height: 160px;
-  border: 2px solid rgba(255, 159, 67, 0.3);
-  border-radius: 50%;
-  transform: translate(-50%, -50%);
-  animation: ringRotate 4s linear infinite reverse;
-}
-
-@keyframes ringRotate {
-  from {
-    transform: translate(-50%, -50%) rotate(0deg);
-  }
-  to {
-    transform: translate(-50%, -50%) rotate(360deg);
-  }
-}
-
-.gift-emoji {
-  font-size: 80px;
-  animation: giftBounce 1.5s ease-in-out infinite;
-  filter: drop-shadow(0 8px 20px rgba(255, 107, 107, 0.3));
-}
-
-@keyframes giftBounce {
-  0%, 100% {
-    transform: translateY(0) scale(1);
-  }
-  25% {
-    transform: translateY(-10px) scale(1.05);
-  }
-  50% {
-    transform: translateY(0) scale(1);
-  }
-  75% {
-    transform: translateY(-5px) scale(1.02);
-  }
-}
-
-.animation-text {
-  font-size: 24px;
-  font-weight: 600;
-  color: #5D4037;
-  text-shadow: 0 2px 10px rgba(255, 107, 107, 0.2);
-  animation: textFade 3s ease-in-out infinite;
-}
-
-@keyframes textFade {
-  0%, 100% {
-    opacity: 0.7;
-  }
-  50% {
-    opacity: 1;
-  }
-}
-
-.progress-bar {
-  width: 200px;
-  height: 8px;
-  background: rgba(255, 182, 193, 0.3);
-  border-radius: 4px;
-  overflow: hidden;
-}
-
-.progress-fill {
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, #FF6B6B, #FF9F43);
-  border-radius: 4px;
-  animation: progressMove 3s ease-in-out infinite;
-}
-
-@keyframes progressMove {
-  0% {
-    width: 0%;
-  }
-  100% {
-    width: 100%;
-  }
-}
-
 @media (min-width: 768px) {
-  .gift-emoji {
-    font-size: 100px;
+  .play-icon {
+    width: 100px;
+    height: 100px;
   }
 
-  .animation-text {
-    font-size: 28px;
+  .play-arrow {
+    font-size: 36px;
+    margin-left: 8px;
   }
 
-  .progress-bar {
-    width: 280px;
-    height: 10px;
+  .video-text {
+    font-size: 18px;
   }
 
-  .sparkle-ring {
-    width: 220px;
-    height: 220px;
-  }
-
-  .ring-inner {
-    width: 150px;
-    height: 150px;
-  }
-
-  .ring-outer {
-    width: 200px;
-    height: 200px;
+  .progress-bar-container {
+    height: 6px;
   }
 }
 </style>
